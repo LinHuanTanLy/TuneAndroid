@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/utils/net/Http.dart';
 import 'pages/NewsListPage.dart';
 import 'pages/DiscoveryPage.dart';
 import 'pages/MyInfoPage.dart';
@@ -21,7 +22,6 @@ class MyApp extends StatefulWidget {
     return new MyMainState();
   }
 }
-
 
 class MyMainState extends State<MyApp> {
   // 默认索引第一个tab
@@ -146,5 +146,3 @@ class MyMainState extends State<MyApp> {
     );
   }
 }
-
-

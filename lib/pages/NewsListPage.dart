@@ -1,54 +1,138 @@
-import 'package:flutter/material.dart';
-import 'package:flutterdemo/widgets/SlideView.dart';
+import 'dart:async';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:flutterdemo/utils/net/Api.dart';
+import 'package:flutterdemo/utils/net/Http.dart';
+import 'package:flutterdemo/widgets/SlideView.dart';
+import 'package:flutter_refresh/flutter_refresh.dart';
 
 // 资讯列表页面
-class NewsListPage extends StatelessWidget {
+class NewsListPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return new NewsListPageState();
+  }
+}
 
-  // 轮播图的数据
+class NewsListPageState extends State<NewsListPage> {
+// 轮播图的数据
   var slideData = [];
+
   // 列表的数据（轮播图数据和列表数据分开，但是实际上轮播图和列表中的item同属于ListView的item）
   var listData = [];
+
+  // 总数
+  var listTotalSize;
+
   // 列表中资讯标题的样式
   TextStyle titleTextStyle = new TextStyle(fontSize: 15.0);
-  // 时间文本的样式
-  TextStyle subtitleStyle = new TextStyle(color: const Color(0xFFB5BDC0), fontSize: 12.0);
 
-  NewsListPage() {
-    // 这里做数据初始化，加入一些测试数据
-    for (int i = 0; i < 3; i++) {
-      Map map = new Map();
-      // 轮播图的资讯标题
-      map['title'] = 'Python 之父透露退位隐情，与核心开发团队产生隔阂';
-      // 轮播图的详情URL
-      map['detailUrl'] = 'https://www.oschina.net/news/98455/guido-van-rossum-resigns';
-      // 轮播图的图片URL
-      map['imgUrl'] = 'https://static.oschina.net/uploads/img/201807/30113144_1SRR.png';
-      slideData.add(map);
-    }
-    for (int i = 0; i < 30; i++) {
-      Map map = new Map();
-      // 列表item的标题
-      map['title'] = 'J2Cache 2.3.23 发布，支持 memcached 二级缓存';
-      // 列表item的作者头像URL
-      map['authorImg'] = 'https://static.oschina.net/uploads/user/0/12_50.jpg?t=1421200584000';
-      // 列表item的时间文本
-      map['timeStr'] = '2018/7/30';
-      // 列表item的资讯图片
-      map['thumb'] = 'https://static.oschina.net/uploads/logo/j2cache_N3NcX.png';
-      // 列表item的评论数
-      map['commCount'] = 5;
-      listData.add(map);
-    }
+  // 时间文本的样式
+  TextStyle subtitleStyle =
+  new TextStyle(color: const Color(0xFFB5BDC0), fontSize: 12.0);
+
+  ScrollController _scrollController = new ScrollController();
+
+  var _mCurPage = 1;
+
+  NewsListPageState() {
+    _scrollController.addListener(() {
+      var maxScroll = _scrollController.position.maxScrollExtent;
+      var pixels = _scrollController.position.pixels;
+      if (maxScroll == pixels && listData.length < listTotalSize) {
+        _mCurPage++;
+        getNewsList(_mCurPage);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getNewsList(_mCurPage);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new ListView.builder(
-      // 这里itemCount是将轮播图组件、分割线和列表items都作为ListView的item算了
-        itemCount: listData.length * 2 + 1,
-        itemBuilder: (context, i) => renderRow(i)
-    );
+    if (listData == null) {
+      return new Center(
+        child: new CircularProgressIndicator(
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      return new Refresh(
+        onFooterRefresh: onFooterRefresh,
+        onHeaderRefresh: onHeaderRefresh,
+        childBuilder: (BuildContext context,
+            {ScrollController controller, ScrollPhysics physics}) {
+          return new Container(child: new ListView.builder(
+            // 这里itemCount是将轮播图组件、分割线和列表items都作为ListView的item算了
+              itemCount: listData.length * 2 + 1,
+              controller: controller,
+              physics: physics,
+              itemBuilder: (context, i) => renderRow(i)));
+        },
+      );
+    }
+  }
+
+  Future<Null> onFooterRefresh() {
+    return new Future.delayed(new Duration(seconds: 2), () {
+      setState(() {
+        _mCurPage++;
+        getNewsList(_mCurPage);
+      });
+    });
+  }
+
+
+  Future<Null> onHeaderRefresh() {
+    return new Future.delayed(new Duration(seconds: 2), () {
+      setState(() {
+        _mCurPage=1;
+        getNewsList(_mCurPage);
+      });
+    });
+  }
+
+  Widget getLoadMoreView() {
+    return new CircularProgressIndicator();
+  }
+
+//  获取数据
+  getNewsList(int curPage) {
+    String url = Api.NEWS_LIST_BASE_URL;
+    url += '?pageIndex=$curPage&pageSize=4';
+    Http.get(url).then((res) {
+      if (res != null) {
+        Map<String, dynamic> map = json.decode(res);
+        debugPrint("the res is" + map.toString());
+        if (map['code'] == 0) {
+          var msg = map['msg'];
+          listTotalSize = msg['news']['total'];
+          var _listData = msg['news']['data'];
+          var _slideData = msg['slide'];
+          setState(() {
+            if (curPage == 1) {
+              listData = _listData;
+              slideData = _slideData;
+            } else {
+              List tempList = new List();
+              tempList.addAll(listData);
+              tempList.addAll(_listData);
+              if (tempList.length >= listTotalSize) {
+                tempList.add('the end');
+              }
+              listData = tempList;
+              slideData = _slideData;
+            }
+          });
+        }
+      } else {
+        debugPrint("the res is null");
+      }
+    });
   }
 
   // 渲染列表item
@@ -91,7 +175,8 @@ class NewsListPage extends StatelessWidget {
             shape: BoxShape.circle,
             color: const Color(0xFFECECEC),
             image: new DecorationImage(
-                image: new NetworkImage(itemData['authorImg']), fit: BoxFit.cover),
+                image: new NetworkImage(itemData['authorImg']),
+                fit: BoxFit.cover),
             border: new Border.all(
               color: const Color(0xFFECECEC),
               width: 2.0,
@@ -114,7 +199,8 @@ class NewsListPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               new Text("${itemData['commCount']}", style: subtitleStyle),
-              new Image.asset('./images/ic_comment.png', width: 16.0, height: 16.0),
+              new Image.asset('./images/ic_comment.png',
+                  width: 16.0, height: 16.0),
             ],
           ),
         )
@@ -192,8 +278,7 @@ class NewsListPage extends StatelessWidget {
     // 用InkWell包裹row，让row可以点击
     return new InkWell(
       child: row,
-      onTap: () {
-      },
+      onTap: () {},
     );
   }
 }

@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/utils/WidgetsUtils.dart';
 import 'package:flutterdemo/utils/net/Api.dart';
 import 'package:flutterdemo/utils/net/Http.dart';
-import 'package:flutterdemo/widgets/SlideView.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
+import 'package:banner_view/banner_view.dart';
 
 // 资讯列表页面
 class NewsListPage extends StatefulWidget {
@@ -30,11 +31,13 @@ class NewsListPageState extends State<NewsListPage> {
 
   // 时间文本的样式
   TextStyle subtitleStyle =
-  new TextStyle(color: const Color(0xFFB5BDC0), fontSize: 12.0);
+      new TextStyle(color: const Color(0xFFB5BDC0), fontSize: 12.0);
 
   ScrollController _scrollController = new ScrollController();
 
   var _mCurPage = 1;
+
+  WidgetsUtils mWidgetsUtils;
 
   NewsListPageState() {
     _scrollController.addListener(() {
@@ -54,6 +57,7 @@ class NewsListPageState extends State<NewsListPage> {
 
   @override
   Widget build(BuildContext context) {
+    mWidgetsUtils = new WidgetsUtils(context);
     if (listData == null) {
       return new Center(
         child: new CircularProgressIndicator(
@@ -66,12 +70,13 @@ class NewsListPageState extends State<NewsListPage> {
         onHeaderRefresh: onHeaderRefresh,
         childBuilder: (BuildContext context,
             {ScrollController controller, ScrollPhysics physics}) {
-          return new Container(child: new ListView.builder(
-            // 这里itemCount是将轮播图组件、分割线和列表items都作为ListView的item算了
-              itemCount: listData.length * 2 + 1,
-              controller: controller,
-              physics: physics,
-              itemBuilder: (context, i) => renderRow(i)));
+          return new Container(
+              child: new ListView.builder(
+                  // 这里itemCount是将轮播图组件、分割线和列表items都作为ListView的item算了
+                  itemCount: listData.length * 2 + 1,
+                  controller: controller,
+                  physics: physics,
+                  itemBuilder: (context, i) => renderRow(i)));
         },
       );
     }
@@ -86,19 +91,16 @@ class NewsListPageState extends State<NewsListPage> {
     });
   }
 
-
   Future<Null> onHeaderRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
-        _mCurPage=1;
+        _mCurPage = 1;
         getNewsList(_mCurPage);
       });
     });
   }
 
-  Widget getLoadMoreView() {
-    return new CircularProgressIndicator();
-  }
+
 
 //  获取数据
   getNewsList(int curPage) {
@@ -139,10 +141,14 @@ class NewsListPageState extends State<NewsListPage> {
   Widget renderRow(i) {
     // i为0时渲染轮播图
     if (i == 0) {
-      return new Container(
-        height: 180.0,
-        child: new SlideView(slideData),
-      );
+      if(slideData!=null && slideData.length>0) {
+        return new Container(
+          height: 180.0,
+          child: new BannerView(mWidgetsUtils.getBannerChild(slideData),
+              intervalDuration: const Duration(seconds: 3),
+              animationDuration: const Duration(milliseconds: 500)),
+        );
+      }
     }
     // i > 0时
     i -= 1;
@@ -185,7 +191,7 @@ class NewsListPageState extends State<NewsListPage> {
         ),
         // 这是时间文本
         new Padding(
-          padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+          padding: const EdgeInsets.fromLTRB(4.0, 0.0, 0.0, 0.0),
           child: new Text(
             itemData['timeStr'],
             style: subtitleStyle,
@@ -199,8 +205,11 @@ class NewsListPageState extends State<NewsListPage> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               new Text("${itemData['commCount']}", style: subtitleStyle),
-              new Image.asset('./images/ic_comment.png',
-                  width: 16.0, height: 16.0),
+              new Padding(
+                padding: new EdgeInsets.fromLTRB(4.0, 0.0, 0.0, 0.0),
+                child: new Image.asset('./images/ic_comment.png',
+                    width: 16.0, height: 16.0),
+              )
             ],
           ),
         )

@@ -1,7 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:flutterdemo/utils/WidgetsUtils.dart';
+import 'dart:async';
 
-class TweetsListPage extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_refresh/flutter_refresh.dart';
+import 'package:flutterdemo/utils/WidgetsUtils.dart';
+import 'package:flutterdemo/utils/cache/SpUtils.dart';
+import 'package:flutterdemo/utils/net/Api.dart';
+import 'package:flutterdemo/utils/net/Http.dart';
+import 'package:flutterdemo/utils/net/ParamsUtils.dart';
+
+class TweetsListPage extends StatefulWidget {
+  @override
+  _TweetsListPageState createState() => _TweetsListPageState();
+}
+
+class _TweetsListPageState extends State<TweetsListPage> {
   var normalList = [];
   var hotList = [];
 
@@ -21,7 +33,12 @@ class TweetsListPage extends StatelessWidget {
 
   double paddingLeft = 42.0;
 
-  TweetsListPage() {
+  int _mCurPage = 1;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
     authorTextStyle = new TextStyle(
         fontSize: 15.0, fontWeight: FontWeight.normal, color: Colors.black);
     subtitleStyle =
@@ -54,6 +71,8 @@ class TweetsListPage extends StatelessWidget {
           'https://b-ssl.duitang.com/uploads/item/201508/27/20150827135810_hGjQ8.thumb.700_0.jpeg,https://b-ssl.duitang.com/uploads/item/201508/27/20150827135810_hGjQ8.thumb.700_0.jpeg,https://b-ssl.duitang.com/uploads/item/201508/27/20150827135810_hGjQ8.thumb.700_0.jpeg,https://b-ssl.duitang.com/uploads/item/201508/27/20150827135810_hGjQ8.thumb.700_0.jpeg';
       hotList.add(map);
       normalList.add(map);
+
+      getNormalList();
     }
   }
 
@@ -73,9 +92,48 @@ class TweetsListPage extends StatelessWidget {
 
   //获取普通列表
   Widget getNormalList() {
-    return new ListView.builder(
-        itemCount: normalList.length * 2 - 1,
-        itemBuilder: (context, i) => renderNormalRow(i));
+    return new Refresh(
+      onFooterRefresh: onFooterRefresh,
+      onHeaderRefresh: onHeaderRefresh,
+      childBuilder: (BuildContext context,
+          {ScrollController controller, ScrollPhysics physics}) {
+        return new ListView.builder(
+            itemCount: normalList.length * 2 - 1,
+            controller: controller,
+            physics: physics,
+            itemBuilder: (context, i) => renderNormalRow(i));
+      },
+    );
+  }
+
+  Future<Null> onFooterRefresh() {
+    return new Future.delayed(new Duration(seconds: 2), () {
+      setState(() {
+        _mCurPage++;
+        getTweetList();
+      });
+    });
+  }
+
+  Future<Null> onHeaderRefresh() {
+    return new Future.delayed(new Duration(seconds: 2), () {
+      setState(() {
+        _mCurPage = 1;
+        getTweetList();
+      });
+    });
+  }
+
+  getTweetList() {
+    String url = Api.TWEET_LIST;
+    SpUtils.getToken().then((str){
+      Map<String,String> params=Map();
+      params['access_token']=str;
+      params['page/pageIndex'] = _mCurPage.toString();
+      Http.get(url, params: params).then((result) {
+        print('the result is $result');
+      });
+    });
   }
 
   renderNormalRow(i) {
@@ -83,9 +141,12 @@ class TweetsListPage extends StatelessWidget {
       return new Divider(height: 1.0);
     } else {
       i = i ~/ 2;
-      return new InkWell(child: getNormalItem(normalList[i]),onTap: (){
-        print("this is the click Event");
-      },);
+      return new InkWell(
+        child: getNormalItem(normalList[i]),
+        onTap: () {
+          print("this is the click Event");
+        },
+      );
     }
   }
 

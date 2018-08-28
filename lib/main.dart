@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/utils/net/Http.dart';
+import 'package:flutterdemo/utils/net/ParamsUtils.dart';
 import 'pages/NewsListPage.dart';
 import 'pages/DiscoveryPage.dart';
 import 'pages/MyInfoPage.dart';
@@ -51,6 +52,8 @@ class MyMainState extends State<MyApp> {
   }
 
   void initData() {
+    // 先那一次数据，把accesstoken放到内存
+    ParamsUtils.getParams();
     _routes['newsDetail'] = (BuildContext) {
       return new NewsDetailPage();
     };

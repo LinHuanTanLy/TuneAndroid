@@ -147,8 +147,9 @@ class _MyInfoPageState extends State<MyInfoPage> {
   }
 
   _getUserInfo() async {
-    Map<String, String> params = ParamsUtils.getParams();
-    SpUtils.getToken().then((token) {
+    SpUtils.getToken().then((str){
+      Map<String,String> params=Map();
+      params['access_token']=str;
       Http.post(Api.USER_INFO, params: params).then((result) {
         var jsonStr = json.decode(result);
         debugPrint('the user info is $jsonStr');

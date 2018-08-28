@@ -10,6 +10,7 @@ class Http {
         sb.write("$key" + "=$value" + "&");
       });
       String paramStr = sb.toString();
+      print('参数是$params');
       paramStr = paramStr.substring(0, paramStr.length - 1);
       url += paramStr;
     }

@@ -11,6 +11,8 @@ dependencies:
   flutter_refresh : ^0.0.1
   shared_preferences: ^0.4.1
   banner_view: ^1.1.2
+  flutter_webview_plugin: ^0.2.1
+  image_picker: ^0.4.7
 dev_dependencies:
   flutter_test:
     sdk: flutter

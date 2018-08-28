@@ -1,7 +1,19 @@
-import 'package:flutter/material.dart';
-import 'login/LoginPage.dart';
+import 'dart:convert';
 
-class MyInfoPage extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutterdemo/pages/info/UserInfoPage.dart';
+import 'package:flutterdemo/utils/cache/SpUtils.dart';
+import 'package:flutterdemo/utils/net/Http.dart';
+import 'package:flutterdemo/utils/net/ParamsUtils.dart';
+import 'login/WebLoginPage.dart';
+import 'package:flutterdemo/utils/net/Api.dart';
+
+class MyInfoPage extends StatefulWidget {
+  @override
+  _MyInfoPageState createState() => _MyInfoPageState();
+}
+
+class _MyInfoPageState extends State<MyInfoPage> {
   static const double IMAGE_ICON_WIDTH = 30.0;
   static const double ARROW_ICON_WIDTH = 16.0;
 
@@ -26,13 +38,19 @@ class MyInfoPage extends StatelessWidget {
   );
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getUserInfo();
+  }
+
+  @override
   Widget build(BuildContext context) {
-//    return showCustomScrollView();
-//    var listView = new ListView.builder(
-//      itemBuilder: (context, i) => renderRow(context,i),
-//      itemCount:   titles.length * 2,
-//    );
-//    return listView;
+    return initView();
+  }
+
+//  构建布局
+  Widget initView() {
     return new CustomScrollView(reverse: false, shrinkWrap: false, slivers: <
         Widget>[
       new SliverAppBar(
@@ -42,7 +60,7 @@ class MyInfoPage extends StatelessWidget {
         iconTheme: new IconThemeData(color: Colors.transparent),
         flexibleSpace: new InkWell(
             onTap: () {
-              userAvatar == null ? debugPrint('登录') : debugPrint('用户信息');
+              userAvatar == null ? _login() : _userDetail();
             },
             child: new Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -112,120 +130,37 @@ class MyInfoPage extends StatelessWidget {
     ]);
   }
 
-  renderRow(context, i) {
-    final userHeaderHeight = 200.0;
-    if (i == 0) {
-      var userHeader = new Container(
-          height: userHeaderHeight,
-          color: Colors.green,
-          child: new Center(
-              child: new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              userAvatar == null
-                  ? new Image.asset(
-                      "images/ic_avatar_default.png",
-                      width: 60.0,
-                    )
-                  : new Container(
-                      width: 60.0,
-                      height: 60.0,
-                      decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.transparent,
-                          image: new DecorationImage(
-                              image: new NetworkImage(userAvatar),
-                              fit: BoxFit.cover),
-                          border:
-                              new Border.all(color: Colors.white, width: 2.0)),
-                    ),
-              new Container(
-                margin: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
-                child: new Text(
-                  userName == null ? '点击头像登录' : userName,
-                  style: new TextStyle(color: Colors.white, fontSize: 16.0),
-                ),
-              )
-            ],
-          )));
-      return new GestureDetector(
-        onTap: () {
-          Navigator.push(context,
-              new MaterialPageRoute(builder: (context) => new LoginPage()));
-        },
-        child: userHeader,
-      );
+  _login() async {
+    final result = await Navigator.of(context)
+        .push(new MaterialPageRoute(builder: (context) {
+      return new WebLoginPage();
+    }));
+    if (result != null && result == 'refresh') {
+      _getUserInfo();
     }
-    --i;
-    if (i.isOdd) {
-      return new Divider(
-        height: 1.0,
-      );
-    }
-    i = i ~/ 2;
-    String title = titles[i];
-    var listItemContent = new Padding(
-      padding: const EdgeInsets.fromLTRB(10.0, 15.0, 10.0, 15.0),
-      child: new Row(
-        children: <Widget>[
-          new Expanded(
-              child: new Text(
-            title,
-            style: titleTextStyle,
-          )),
-          rightArrowIcon
-        ],
-      ),
-    );
-    return new InkWell(
-      child: listItemContent,
-      onTap: () {},
-    );
   }
-}
 
-Widget showCustomScrollView() {
-  return new CustomScrollView(
-    slivers: <Widget>[
-      const SliverAppBar(
-        pinned: true,
-        expandedHeight: 250.0,
-        flexibleSpace: const FlexibleSpaceBar(
-          title: const Text('Demo'),
-        ),
-      ),
-      new SliverGrid(
-        gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
-          //横轴的最大长度
-          maxCrossAxisExtent: 200.0,
-          //主轴间隔
-          mainAxisSpacing: 10.0,
-          crossAxisSpacing: 10.0,
-          //横轴间隔
-          childAspectRatio: 1.0,
-        ),
-        delegate: new SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
-            return new Container(
-              alignment: Alignment.center,
-              color: Colors.teal[100 * (index % 9)],
-              child: new Text('grid item $index'),
-            );
-          },
-          childCount: 20,
-        ),
-      ),
-      new SliverFixedExtentList(
-        itemExtent: 50.0,
-        delegate:
-            new SliverChildBuilderDelegate((BuildContext context, int index) {
-          return new Container(
-            alignment: Alignment.center,
-            color: Colors.lightBlue[100 * (index % 9)],
-            child: new Text('list item $index'),
-          );
-        }, childCount: 10),
-      ),
-    ],
-  );
+  _userDetail() {
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      return new UserInfoPage();
+    }));
+  }
+
+  _getUserInfo() async {
+    Map<String, String> params = ParamsUtils.getParams();
+    SpUtils.getToken().then((token) {
+      Http.post(Api.USER_INFO, params: params).then((result) {
+        var jsonStr = json.decode(result);
+        debugPrint('the user info is $jsonStr');
+        SpUtils.map2UserInfo(jsonStr).then((userInfo) {
+          SpUtils.saveUserInfo(userInfo);
+          setState(() {
+            userName = userInfo.name;
+            debugPrint('the userAvatar is $userAvatar');
+            userAvatar = userInfo.avatar;
+          });
+        });
+      });
+    });
+  }
 }

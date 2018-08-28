@@ -33,22 +33,11 @@ class NewsListPageState extends State<NewsListPage> {
   TextStyle subtitleStyle =
       new TextStyle(color: const Color(0xFFB5BDC0), fontSize: 12.0);
 
-  ScrollController _scrollController = new ScrollController();
 
   var _mCurPage = 1;
 
   WidgetsUtils mWidgetsUtils;
 
-  NewsListPageState() {
-    _scrollController.addListener(() {
-      var maxScroll = _scrollController.position.maxScrollExtent;
-      var pixels = _scrollController.position.pixels;
-      if (maxScroll == pixels && listData.length < listTotalSize) {
-        _mCurPage++;
-        getNewsList(_mCurPage);
-      }
-    });
-  }
 
   @override
   void initState() {
@@ -58,7 +47,7 @@ class NewsListPageState extends State<NewsListPage> {
   @override
   Widget build(BuildContext context) {
     mWidgetsUtils = new WidgetsUtils(context);
-    if (listData == null) {
+    if (listData.length == 0) {
       return new Center(
         child: new CircularProgressIndicator(
           backgroundColor: Colors.green,
@@ -100,8 +89,6 @@ class NewsListPageState extends State<NewsListPage> {
     });
   }
 
-
-
 //  获取数据
   getNewsList(int curPage) {
     String url = Api.NEWS_LIST_BASE_URL;
@@ -141,7 +128,7 @@ class NewsListPageState extends State<NewsListPage> {
   Widget renderRow(i) {
     // i为0时渲染轮播图
     if (i == 0) {
-      if(slideData!=null && slideData.length>0) {
+      if (slideData != null && slideData.length > 0) {
         return new Container(
           height: 180.0,
           child: new BannerView(mWidgetsUtils.getBannerChild(slideData),

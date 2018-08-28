@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/utils/WidgetsUtils.dart';
 
 class LoginPage extends StatefulWidget {
-
   @override
   State<StatefulWidget> createState() {
     return new _LoginPageState();
@@ -18,11 +18,16 @@ class _LoginPageState extends State<LoginPage> {
   var _userPassController = new TextEditingController();
   var _userNameController = new TextEditingController();
 
+  WidgetsUtils widgetsUtils;
+
+
+
   @override
   Widget build(BuildContext context) {
+    widgetsUtils=new WidgetsUtils(context);
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text("登录", style: new TextStyle(color: Colors.white)),
+          title: widgetsUtils.getAppBar('登录'),
           iconTheme: new IconThemeData(color: Colors.white),
         ),
         body: new Column(

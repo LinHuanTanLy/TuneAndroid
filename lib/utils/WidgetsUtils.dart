@@ -63,6 +63,7 @@ class WidgetsUtils {
     return b;
   }
 
+  // banner图片
   List<Widget> getBannerChild(List slideData) {
     List<Widget> items = [];
     if (slideData != null && slideData.length > 0) {
@@ -95,4 +96,11 @@ class WidgetsUtils {
       return items;
     }
   }
+
+// 获取appBar
+  Widget getAppBar(var title) {
+    return new Text(title, style: new TextStyle(color: Colors.white));
+  }
+
+
 }

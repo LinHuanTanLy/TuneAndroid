@@ -13,6 +13,7 @@ dependencies:
   banner_view: ^1.1.2
   flutter_webview_plugin: ^0.2.1
   image_picker: ^0.4.7
+  fluttertoast: ^2.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -59,6 +60,11 @@ flutter:
      - images/ic_my_recommend.png
      - images/ic_my_team.png
      - images/oschina.png
+     - images/android.jpg
+     - images/ic_is_like.png
+     - images/ic_un_like.png
+     - images/author.png
+     - images/ic_xiaoxin.jpg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg

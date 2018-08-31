@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/pages/info/UserInfoPage.dart';
+import 'package:flutterdemo/pages/login/LoginPage.dart';
 import 'package:flutterdemo/utils/cache/SpUtils.dart';
 import 'package:flutterdemo/utils/net/Http.dart';
 import 'package:flutterdemo/utils/net/ParamsUtils.dart';
@@ -133,7 +134,7 @@ class _MyInfoPageState extends State<MyInfoPage> {
   _login() async {
     final result = await Navigator.of(context)
         .push(new MaterialPageRoute(builder: (context) {
-      return new WebLoginPage();
+      return new LoginPage();
     }));
     if (result != null && result == 'refresh') {
       _getUserInfo();
@@ -147,21 +148,21 @@ class _MyInfoPageState extends State<MyInfoPage> {
   }
 
   _getUserInfo() async {
-    SpUtils.getToken().then((str){
-      Map<String,String> params=Map();
-      params['access_token']=str;
-      Http.post(Api.USER_INFO, params: params).then((result) {
-        var jsonStr = json.decode(result);
-        debugPrint('the user info is $jsonStr');
-        SpUtils.map2UserInfo(jsonStr).then((userInfo) {
-          SpUtils.saveUserInfo(userInfo);
-          setState(() {
-            userName = userInfo.name;
-            debugPrint('the userAvatar is $userAvatar');
-            userAvatar = userInfo.avatar;
-          });
-        });
-      });
-    });
+//    SpUtils.getToken().then((str){
+//      Map<String,String> params=Map();
+//      params['access_token']=str;
+//      Http.post(Api.USER_INFO, params: params).then((result) {
+//        var jsonStr = json.decode(result);
+//        debugPrint('the user info is $jsonStr');
+//        SpUtils.map2UserInfo(jsonStr).then((userInfo) {
+//          SpUtils.saveUserInfo(userInfo);
+//          setState(() {
+//            userName = userInfo.name;
+//            debugPrint('the userAvatar is $userAvatar');
+//            userAvatar = userInfo.avatar;
+//          });
+//        });
+//      });
+//    });
   }
 }

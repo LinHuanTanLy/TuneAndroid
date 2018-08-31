@@ -15,12 +15,13 @@ class WidgetsUtils {
       List<String> imgList = imgStr.split(",");
       List<String> imgUrl = new List<String>();
       for (String s in imgList) {
-        if (s.startsWith('http')) {
-          imgUrl.add(s);
+        if (s.startsWith('https://static.oschina.net/uploads/space/https://oscimg.oschina.net/oscnet')) {
+          imgUrl.add(s.substring('https://static.oschina.net/uploads/space/'.length,s.length));
         } else {
-          imgUrl.add('https://static.oschina.net/uploads/space/' + s);
+          imgUrl.add(s);
         }
       }
+      debugPrint('the imgUrl list is ${imgUrl.toString()}');
       List<List<Widget>> rows = [];
       num len = imgUrl.length;
       if (len > 1) {
@@ -47,8 +48,24 @@ class WidgetsUtils {
             children: row,
           ));
         }
+      }else{
+        double cellWidth = (screenWidth - 100) / 3;
+        widgetList.add(new Row(
+          children: <Widget>[
+        new Padding(
+        padding: const EdgeInsets.all(2.0),
+          child: new Image.network(
+            imgUrl[0],
+            width: cellWidth,
+            height: cellWidth,
+          ),
+        )
+          ],
+        ));
       }
     }
+
+    debugPrint('the widgetList is ${widgetList.toString()}');
     return widgetList;
   }
 
@@ -69,9 +86,9 @@ class WidgetsUtils {
     if (slideData != null && slideData.length > 0) {
       for (var i = 0; i < slideData.length; i++) {
         var item = slideData[i];
-        var imgUrl = item['imgUrl'];
+        var imgUrl = item['imagePath'];
         var title = item['title'];
-        var detailUrl = item['detailUrl'];
+        var detailUrl = item['url'];
         items.add(new GestureDetector(
           onTap: () {
             // 详情跳转

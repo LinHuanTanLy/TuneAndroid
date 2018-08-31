@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutterdemo/utils/net/Http.dart';
+import 'package:flutterdemo/pages/SystemPage.dart';
 import 'package:flutterdemo/utils/net/ParamsUtils.dart';
 import 'pages/NewsListPage.dart';
 import 'pages/DiscoveryPage.dart';
 import 'pages/MyInfoPage.dart';
-import 'pages/TweetsListPage.dart';
-import 'pages/NewsDetailPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutterdemo/widgets/LeftDraw.dart';
 import 'package:flutter/rendering.dart';
@@ -41,7 +39,7 @@ class MyMainState extends State<MyApp> {
   var _body;
 
   // 菜单文案
-  var tabTitles = ['资讯', '动弹', '发现', '我的'];
+  var tabTitles = ['文章', '体系', '发现', '我的'];
 
   // 路由map
   Map<String, WidgetBuilder> _routes = new Map();
@@ -54,9 +52,6 @@ class MyMainState extends State<MyApp> {
   void initData() {
     // 先那一次数据，把accesstoken放到内存
     ParamsUtils.getParams();
-    _routes['newsDetail'] = (BuildContext) {
-      return new NewsDetailPage();
-    };
     if (tabImages == null) {
       tabImages = [
         [
@@ -80,7 +75,7 @@ class MyMainState extends State<MyApp> {
     _body = new IndexedStack(
       children: <Widget>[
         new NewsListPage(),
-        new TweetsListPage(),
+        new SystemPage(),
         new DiscoveryPage(),
         new MyInfoPage()
       ],

@@ -16,6 +16,8 @@ class SpUtils {
   static const SP_TOKEN_TYPE = 'sp_token_type';
   static const SP_EXPIRES_IN = 'sp_expires_in';
 
+  static const SP_COOKIE = 'sp_cookie';
+
 // 保存用户信息
   static void saveUserInfo(UserInfoBean userInfo) async {
     if (userInfo != null) {
@@ -78,10 +80,22 @@ class SpUtils {
       sp.setString(SP_EXPIRES_IN, expiresIn.toString());
     }
   }
+
 //获取accessToken;
   static Future<String> getToken() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var accessToken = sharedPreferences.getString(SP_ACCESS_TOKEN);
     return accessToken;
+  }
+
+  static void saveCookie(var cookie) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString(SP_COOKIE, cookie);
+  }
+
+  static Future<String> getCookie() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var cookieStr = sharedPreferences.getString(SP_COOKIE);
+    return cookieStr;
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/pages/news/NewsDetailPage.dart';
 import 'package:flutterdemo/utils/WidgetsUtils.dart';
 import 'package:flutterdemo/utils/net/Api.dart';
 import 'package:flutterdemo/utils/net/Http.dart';
@@ -31,17 +32,23 @@ class NewsListPageState extends State<NewsListPage> {
 
   // 时间文本的样式
   TextStyle subtitleStyle =
-      new TextStyle(color: const Color(0xFFB5BDC0), fontSize: 12.0);
+  new TextStyle(color: const Color(0xFFB5BDC0), fontSize: 12.0);
 
+//  作者style
+  TextStyle authorStyle = new TextStyle(
+      color: const Color(0xFF000000), fontSize: 12.0);
 
-  var _mCurPage = 1;
+  // 分页
+  var _mCurPage = 0;
+
 
   WidgetsUtils mWidgetsUtils;
 
-
   @override
   void initState() {
+    super.initState();
     getNewsList(_mCurPage);
+    getBannerList();
   }
 
   @override
@@ -61,7 +68,7 @@ class NewsListPageState extends State<NewsListPage> {
             {ScrollController controller, ScrollPhysics physics}) {
           return new Container(
               child: new ListView.builder(
-                  // 这里itemCount是将轮播图组件、分割线和列表items都作为ListView的item算了
+                // 这里itemCount是将轮播图组件、分割线和列表items都作为ListView的item算了
                   itemCount: listData.length * 2 + 1,
                   controller: controller,
                   physics: physics,
@@ -84,42 +91,39 @@ class NewsListPageState extends State<NewsListPage> {
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
         _mCurPage = 1;
+        getBannerList();
         getNewsList(_mCurPage);
       });
     });
   }
 
-//  获取数据
+//  获取Banner数据
+  getBannerList() {
+    Http.get(Api.HOME_BANNER).then((res) {
+      Map<String, dynamic> map = jsonDecode(res);
+      setState(() {
+        slideData = map['data'];
+      });
+    });
+  }
+
+// 获取文章列表数据
   getNewsList(int curPage) {
-    String url = Api.NEWS_LIST_BASE_URL;
-    url += '?pageIndex=$curPage&pageSize=4';
+    var url = Api.HOME_ARTICLE + curPage.toString() + "/json";
     Http.get(url).then((res) {
-      if (res != null) {
-        Map<String, dynamic> map = json.decode(res);
-        debugPrint("the res is" + map.toString());
-        if (map['code'] == 0) {
-          var msg = map['msg'];
-          listTotalSize = msg['news']['total'];
-          var _listData = msg['news']['data'];
-          var _slideData = msg['slide'];
-          setState(() {
-            if (curPage == 1) {
-              listData = _listData;
-              slideData = _slideData;
-            } else {
-              List tempList = new List();
-              tempList.addAll(listData);
-              tempList.addAll(_listData);
-              if (tempList.length >= listTotalSize) {
-                tempList.add('the end');
-              }
-              listData = tempList;
-              slideData = _slideData;
-            }
-          });
-        }
-      } else {
-        debugPrint("the res is null");
+      try {
+        Map<String, dynamic> map = jsonDecode(res);
+        setState(() {
+          var _listData = map['data']['datas'];
+          if (curPage == 1) {
+            listData.clear();
+            listData.addAll(_listData);
+          } else {
+            listData.addAll(_listData);
+          }
+        });
+      } catch (e) {
+        print('错误catch s $e');
       }
     });
   }
@@ -147,9 +151,11 @@ class NewsListPageState extends State<NewsListPage> {
     i = i ~/ 2;
     // 得到列表item的数据
     var itemData = listData[i];
-    // 代表列表item中的标题这一行
+
+//    标题行
     var titleRow = new Row(
       children: <Widget>[
+
         // 标题充满一整行，所以用Expanded组件包裹
         new Expanded(
           child: new Text(itemData['title'], style: titleTextStyle),
@@ -159,28 +165,17 @@ class NewsListPageState extends State<NewsListPage> {
     // 时间这一行包含了作者头像、时间、评论数这几个
     var timeRow = new Row(
       children: <Widget>[
-        // 这是作者头像，使用了圆形头像
         new Container(
-          width: 20.0,
-          height: 20.0,
-          decoration: new BoxDecoration(
-            // 通过指定shape属性设置图片为圆形
-            shape: BoxShape.circle,
-            color: const Color(0xFFECECEC),
-            image: new DecorationImage(
-                image: new NetworkImage(itemData['authorImg']),
-                fit: BoxFit.cover),
-            border: new Border.all(
-              color: const Color(0xFFECECEC),
-              width: 2.0,
-            ),
+          child: new Text(
+            itemData['superChapterName'],
+            style: subtitleStyle,
           ),
         ),
         // 这是时间文本
         new Padding(
           padding: const EdgeInsets.fromLTRB(4.0, 0.0, 0.0, 0.0),
           child: new Text(
-            itemData['timeStr'],
+            itemData['niceDate'],
             style: subtitleStyle,
           ),
         ),
@@ -191,10 +186,10 @@ class NewsListPageState extends State<NewsListPage> {
             // 为了让评论数显示在最右侧，所以需要外面的Expanded和这里的MainAxisAlignment.end
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              new Text("${itemData['commCount']}", style: subtitleStyle),
+              new Text("${itemData['zan']}", style: subtitleStyle),
               new Padding(
                 padding: new EdgeInsets.fromLTRB(4.0, 0.0, 0.0, 0.0),
-                child: new Image.asset('./images/ic_comment.png',
+                child: new Image.asset(itemData['collect']?'./images/ic_is_like.png':'./images/ic_un_like.png',
                     width: 16.0, height: 16.0),
               )
             ],
@@ -202,43 +197,6 @@ class NewsListPageState extends State<NewsListPage> {
         )
       ],
     );
-    var thumbImgUrl = itemData['thumb'];
-    // 这是item右侧的资讯图片，先设置一个默认的图片
-    var thumbImg = new Container(
-      margin: const EdgeInsets.all(10.0),
-      width: 60.0,
-      height: 60.0,
-      decoration: new BoxDecoration(
-        shape: BoxShape.circle,
-        color: const Color(0xFFECECEC),
-        image: new DecorationImage(
-            image: new ExactAssetImage('./images/ic_img_default.jpg'),
-            fit: BoxFit.cover),
-        border: new Border.all(
-          color: const Color(0xFFECECEC),
-          width: 2.0,
-        ),
-      ),
-    );
-    // 如果上面的thumbImgUrl不为空，就把之前thumbImg默认的图片替换成网络图片
-    if (thumbImgUrl != null && thumbImgUrl.length > 0) {
-      thumbImg = new Container(
-        margin: const EdgeInsets.all(10.0),
-        width: 60.0,
-        height: 60.0,
-        decoration: new BoxDecoration(
-          shape: BoxShape.circle,
-          color: const Color(0xFFECECEC),
-          image: new DecorationImage(
-              image: new NetworkImage(thumbImgUrl), fit: BoxFit.cover),
-          border: new Border.all(
-            color: const Color(0xFFECECEC),
-            width: 2.0,
-          ),
-        ),
-      );
-    }
-    // 这里的row代表了一个ListItem的一行
     var row = new Row(
       children: <Widget>[
         // 左边是标题，时间，评论数等信息
@@ -248,7 +206,18 @@ class NewsListPageState extends State<NewsListPage> {
             padding: const EdgeInsets.all(10.0),
             child: new Column(
               children: <Widget>[
-                titleRow,
+                new Row(children: <Widget>[
+                  new Container(
+                    width: 14.0,
+                    height: 14.0,
+                    child: new Image.asset('./images/author.png'),
+                    margin: new EdgeInsets.fromLTRB(0.0, 0.0, 2.0, 0.0),),
+                  new Text('${itemData['author']}', style: authorStyle,)
+                ],),
+                new Container(
+                  margin: new EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 6.0),
+                  child: titleRow,
+                ),
                 new Padding(
                   padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
                   child: timeRow,
@@ -257,24 +226,15 @@ class NewsListPageState extends State<NewsListPage> {
             ),
           ),
         ),
-        // 右边是资讯图片
-        new Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: new Container(
-            width: 100.0,
-            height: 80.0,
-            color: const Color(0xFFECECEC),
-            child: new Center(
-              child: thumbImg,
-            ),
-          ),
-        )
       ],
     );
-    // 用InkWell包裹row，让row可以点击
     return new InkWell(
       child: row,
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+          return new NewsDetailPage(itemData['link'],itemData['title']);
+        }));
+      },
     );
   }
 }

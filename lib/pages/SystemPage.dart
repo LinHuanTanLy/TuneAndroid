@@ -32,8 +32,6 @@ class _SystemPageState extends State<SystemPage> {
               './images/ic_xiaoxin.jpg',
               fit: BoxFit.fill,
             )),
-//        new ListView.builder(itemBuilder: (context, i) => initItem(i),
-//        itemCount: _treeList.length,),
         new SliverFixedExtentList(
             delegate: new SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
@@ -47,11 +45,13 @@ class _SystemPageState extends State<SystemPage> {
                         new Padding(
                             padding:
                                 const EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
-                            child:
-                            new Column(
+                            child: new Column(
                               children: <Widget>[
-                                new Container(child:  new Text(_tempItems['name']),alignment: Alignment.centerLeft,),
-                                new Text(_childStr(_tempItems)),
+                                new Container(
+                                  child: new Text(_tempItems['name']),
+                                  alignment: Alignment.centerLeft,
+                                ),
+                                new Container(height:150.0,child:  new Text(_childStr(_tempItems)),)
                               ],
                             )),
                         new Divider(

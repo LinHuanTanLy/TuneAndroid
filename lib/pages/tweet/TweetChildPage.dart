@@ -108,29 +108,29 @@ class _TweetChildPageState extends State<TweetChildPage> with AutomaticKeepAlive
 
   getTweetList() {
     String url = Api.TWEET_LIST;
-    SpUtils.getToken().then((str) {
-      if(str!=null) {
-        Map<String, String> params = Map();
-        params['access_token'] = str;
-        params['page/pageIndex'] = _mCurPage.toString();
-        params['user'] = _user.toString();
-        Http.get(url, params: params).then((result) {
-          Map<String, dynamic> map = json.decode(result);
-          var _tempTweetList = map['tweetlist'];
-          setState(() {
-            if (_mCurPage == 1) {
-              _tweetsList.clear();
-              _tweetsList.addAll(_tempTweetList);
-            } else {
-              _tweetsList.addAll(_tempTweetList);
-            }
-            debugPrint('_tweetsList length is ${_tweetsList.length}');
-          });
-        });
-      }else{
-
-      }
-    });
+//    SpUtils.getToken().then((str) {
+//      if(str!=null) {
+//        Map<String, String> params = Map();
+//        params['access_token'] = str;
+//        params['page/pageIndex'] = _mCurPage.toString();
+//        params['user'] = _user.toString();
+//        Http.get(url, params: params).then((result) {
+//          Map<String, dynamic> map = json.decode(result);
+//          var _tempTweetList = map['tweetlist'];
+//          setState(() {
+//            if (_mCurPage == 1) {
+//              _tweetsList.clear();
+//              _tweetsList.addAll(_tempTweetList);
+//            } else {
+//              _tweetsList.addAll(_tempTweetList);
+//            }
+//            debugPrint('_tweetsList length is ${_tweetsList.length}');
+//          });
+//        });
+//      }else{
+//
+//      }
+//    });
   }
 
   toTweetDetail(var id){

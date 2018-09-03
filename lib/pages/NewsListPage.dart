@@ -135,7 +135,7 @@ class NewsListPageState extends State<NewsListPage> {
       if (slideData != null && slideData.length > 0) {
         return new Container(
           height: 180.0,
-          child: new BannerView(mWidgetsUtils.getBannerChild(slideData),
+          child: new BannerView(mWidgetsUtils.getBannerChild(context,slideData),
               intervalDuration: const Duration(seconds: 3),
               animationDuration: const Duration(milliseconds: 500)),
         );

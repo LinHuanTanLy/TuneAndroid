@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/pages/menu/SetPage.dart';
 
 //侧滑菜单
 class LeftDraw extends StatelessWidget {
@@ -21,7 +22,7 @@ class LeftDraw extends StatelessWidget {
     'images/leftmenu/ic_fabu.png',
     'images/leftmenu/ic_xiaoheiwu.png',
     'images/leftmenu/ic_about.png',
-    'images/leftmenu/ic_settings.png'
+    'images/ic_set.png'
   ];
 
   // 菜单文本的样式
@@ -32,7 +33,7 @@ class LeftDraw extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new ConstrainedBox(
-      constraints: const BoxConstraints.expand(width:IMAGE_BANNER_WIDTH),
+      constraints: const BoxConstraints.expand(width: IMAGE_BANNER_WIDTH),
       child: new Material(
         elevation: 16.0,
         child: new Container(
@@ -93,7 +94,17 @@ class LeftDraw extends StatelessWidget {
     return new InkWell(
       child: listItemContent,
       onTap: () {
-        print('click list item $index');
+        debugPrint('the index is $index');
+        switch (index) {
+          case 3:
+            Navigator.of(con).push(new MaterialPageRoute(builder: (con) {
+              return new SetPage();
+            }));
+            break;
+          case 2:
+          case 1:
+          case 0:
+        }
       },
     );
   }

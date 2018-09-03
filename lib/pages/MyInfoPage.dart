@@ -1,13 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/app/OsApplication.dart';
+import 'package:flutterdemo/domain/event/LoginEvent.dart';
 import 'package:flutterdemo/pages/info/UserInfoPage.dart';
 import 'package:flutterdemo/pages/login/LoginPage.dart';
 import 'package:flutterdemo/utils/cache/SpUtils.dart';
-import 'package:flutterdemo/utils/net/Http.dart';
-import 'package:flutterdemo/utils/net/ParamsUtils.dart';
-import 'login/WebLoginPage.dart';
-import 'package:flutterdemo/utils/net/Api.dart';
+import 'package:event_bus/event_bus.dart';
 
 class MyInfoPage extends StatefulWidget {
   @override
@@ -40,9 +37,19 @@ class _MyInfoPageState extends State<MyInfoPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _getUserInfo();
+    OsApplication.eventBus.on<LoginEvent>().listen((event) {
+      setState(() {
+        if (event != null && event.userName != null) {
+          userName = event.userName;
+          userAvatar = 'http://www.wanandroid.com/resources/image/pc/logo.png';
+        } else {
+          userName = null;
+          userAvatar = null;
+        }
+      });
+    });
   }
 
   @override
@@ -148,21 +155,13 @@ class _MyInfoPageState extends State<MyInfoPage> {
   }
 
   _getUserInfo() async {
-//    SpUtils.getToken().then((str){
-//      Map<String,String> params=Map();
-//      params['access_token']=str;
-//      Http.post(Api.USER_INFO, params: params).then((result) {
-//        var jsonStr = json.decode(result);
-//        debugPrint('the user info is $jsonStr');
-//        SpUtils.map2UserInfo(jsonStr).then((userInfo) {
-//          SpUtils.saveUserInfo(userInfo);
-//          setState(() {
-//            userName = userInfo.name;
-//            debugPrint('the userAvatar is $userAvatar');
-//            userAvatar = userInfo.avatar;
-//          });
-//        });
-//      });
-//    });
+    SpUtils.getUserInfo().then((userInfoBean) {
+      if (userInfoBean != null && userInfoBean.username != null) {
+        setState(() {
+          userName = userInfoBean.username;
+          userAvatar = 'http://www.wanandroid.com/resources/image/pc/logo.png';
+        });
+      }
+    });
   }
 }

@@ -71,4 +71,8 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
     }
     return appbarChildList;
   }
+
+  Widget _getItem(){
+
+  }
 }

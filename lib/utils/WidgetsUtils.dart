@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/pages/news/NewsDetailPage.dart';
 
 class WidgetsUtils {
   // 屏幕宽度
@@ -15,8 +16,10 @@ class WidgetsUtils {
       List<String> imgList = imgStr.split(",");
       List<String> imgUrl = new List<String>();
       for (String s in imgList) {
-        if (s.startsWith('https://static.oschina.net/uploads/space/https://oscimg.oschina.net/oscnet')) {
-          imgUrl.add(s.substring('https://static.oschina.net/uploads/space/'.length,s.length));
+        if (s.startsWith(
+            'https://static.oschina.net/uploads/space/https://oscimg.oschina.net/oscnet')) {
+          imgUrl.add(s.substring(
+              'https://static.oschina.net/uploads/space/'.length, s.length));
         } else {
           imgUrl.add(s);
         }
@@ -48,18 +51,18 @@ class WidgetsUtils {
             children: row,
           ));
         }
-      }else{
+      } else {
         double cellWidth = (screenWidth - 100) / 3;
         widgetList.add(new Row(
           children: <Widget>[
-        new Padding(
-        padding: const EdgeInsets.all(2.0),
-          child: new Image.network(
-            imgUrl[0],
-            width: cellWidth,
-            height: cellWidth,
-          ),
-        )
+            new Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: new Image.network(
+                imgUrl[0],
+                width: cellWidth,
+                height: cellWidth,
+              ),
+            )
           ],
         ));
       }
@@ -81,7 +84,7 @@ class WidgetsUtils {
   }
 
   // banner图片
-  List<Widget> getBannerChild(List slideData) {
+  List<Widget> getBannerChild(BuildContext context, List slideData) {
     List<Widget> items = [];
     if (slideData != null && slideData.length > 0) {
       for (var i = 0; i < slideData.length; i++) {
@@ -92,6 +95,10 @@ class WidgetsUtils {
         items.add(new GestureDetector(
           onTap: () {
             // 详情跳转
+            Navigator.of(context)
+                .push(new MaterialPageRoute(builder: (context) {
+              return new NewsDetailPage(detailUrl, title);
+            }));
           },
           child: new Stack(
             children: <Widget>[
@@ -118,6 +125,4 @@ class WidgetsUtils {
   Widget getAppBar(var title) {
     return new Text(title, style: new TextStyle(color: Colors.white));
   }
-
-
 }

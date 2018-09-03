@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/app/OsApplication.dart';
+import 'package:flutterdemo/domain/event/LoginEvent.dart';
 import 'package:flutterdemo/utils/WidgetsUtils.dart';
+import 'package:flutterdemo/utils/cache/SpUtils.dart';
 import 'package:flutterdemo/utils/net/Api.dart';
 import 'package:flutterdemo/utils/net/Http.dart';
 import 'package:flutterdemo/utils/toast/TsUtils.dart';
@@ -109,7 +112,13 @@ class _LoginPageState extends State<LoginPage> {
       params['username'] = userName;
       params['password'] = userPassword;
       Http.post(Api.USER_LOGIN, params: params,saveCookie: true).then((result) {
-
+        SpUtils.map2UserInfo(result).then((userInfoBean){
+          if(userInfoBean!=null){
+            OsApplication.eventBus.fire(new LoginEvent(userInfoBean.username));
+            SpUtils.saveUserInfo(userInfoBean);
+            Navigator.pop(context);
+          }
+        });
       });
     } else {
       TsUtils.showShort('请输入用户名和密码');

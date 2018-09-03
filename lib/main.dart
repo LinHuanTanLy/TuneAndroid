@@ -140,7 +140,7 @@ class MyMainState extends State<MyApp> {
               });
             },
           ),
-          drawer: new LeftDraw()),
+          drawer: new Container(child: new LeftDraw(),)),
     );
   }
 }

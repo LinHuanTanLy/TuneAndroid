@@ -37,4 +37,6 @@ class Api {
 
 //  体系
   static final String HOME_SYSTEM='tree/json';
+// 体系下的文章
+  static final String HOME_SYSTEM_CHILD='article/list/';
 }

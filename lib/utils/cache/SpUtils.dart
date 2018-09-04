@@ -1,3 +1,4 @@
+import 'package:flutterdemo/app/OsApplication.dart';
 import 'package:flutterdemo/domain/UserInfoBean.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
@@ -22,12 +23,15 @@ class SpUtils {
       sharedPreferences.setString(SP_EMAIL, userInfo.email);
     }
   }
+
 // 清除用户信息
   static void cleanUserInfo() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString(SP_ID, null);
     sharedPreferences.setString(SP_NAME, null);
     sharedPreferences.setString(SP_EMAIL, null);
+    saveCookie(null);
+    OsApplication.cookie=null;
   }
 
 //  获取用户信息

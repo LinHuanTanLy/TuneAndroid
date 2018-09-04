@@ -1,32 +1,28 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/app/OsApplication.dart';
 import 'package:flutterdemo/domain/event/LoginEvent.dart';
-import 'package:flutterdemo/pages/login/RegisterPage.dart';
 import 'package:flutterdemo/utils/WidgetsUtils.dart';
 import 'package:flutterdemo/utils/cache/SpUtils.dart';
 import 'package:flutterdemo/utils/net/Api.dart';
 import 'package:flutterdemo/utils/net/Http.dart';
 import 'package:flutterdemo/utils/toast/TsUtils.dart';
 
-class LoginPage extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() {
-    return new _LoginPageState();
-  }
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
+  WidgetsUtils widgetsUtils;
+  var _userPassController = new TextEditingController();
+  var _userNameController = new TextEditingController();
+  var _passWordConfirmController = new TextEditingController();
+
   var leftRightPadding = 40.0;
   var topBottomPadding = 4.0;
   var textTips = new TextStyle(fontSize: 16.0, color: Colors.black);
   var hintTips = new TextStyle(fontSize: 15.0, color: Colors.black26);
   static const LOGO = "images/android.jpg";
-
-  var _userPassController = new TextEditingController();
-  var _userNameController = new TextEditingController();
-
-  WidgetsUtils widgetsUtils;
 
   @override
   Widget build(BuildContext context) {
@@ -67,19 +63,15 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: true,
               ),
             ),
-            new InkWell(
-              child: new Container(
-                  alignment: Alignment.centerRight,
-                  child: new Text(
-                    '没有账号？马上注册',
-                    style: hintTips,
-                  ),
-                  padding: new EdgeInsets.fromLTRB(
-                      leftRightPadding, 10.0, leftRightPadding, 0.0)),
-              onTap: (() {
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (context) => new RegisterPage()));
-              }),
+            new Padding(
+              padding: new EdgeInsets.fromLTRB(
+                  leftRightPadding, 30.0, leftRightPadding, topBottomPadding),
+              child: new TextField(
+                style: hintTips,
+                controller: _passWordConfirmController,
+                decoration: new InputDecoration(hintText: "请再次输入用户密码"),
+                obscureText: true,
+              ),
             ),
             new Container(
               width: 360.0,
@@ -91,8 +83,10 @@ class _LoginPageState extends State<LoginPage> {
                 elevation: 6.0,
                 child: new FlatButton(
                     onPressed: () {
-                      _postLogin(
-                          _userNameController.text, _userPassController.text);
+                      _postRegister(
+                          _userNameController.text,
+                          _userPassController.text,
+                          _passWordConfirmController.text);
                     },
                     child: new Padding(
                       padding: new EdgeInsets.all(10.0),
@@ -108,21 +102,27 @@ class _LoginPageState extends State<LoginPage> {
         ));
   }
 
-  _postLogin(String userName, String userPassword) {
-    if (userName.isNotEmpty && userPassword.isNotEmpty) {
-      Map<String, String> params = new Map();
-      params['username'] = userName;
-      params['password'] = userPassword;
-      Http.post(Api.USER_LOGIN, params: params, saveCookie: true)
-          .then((result) {
-        SpUtils.map2UserInfo(result).then((userInfoBean) {
-          if (userInfoBean != null) {
-            OsApplication.eventBus.fire(new LoginEvent(userInfoBean.username));
-            SpUtils.saveUserInfo(userInfoBean);
-            Navigator.pop(context);
-          }
-        });
-      });
+  void _postRegister(
+      String userName, String password, String passWordConfirm) {
+    if (userName.isNotEmpty && password.isNotEmpty && passWordConfirm.isNotEmpty) {
+        if(password==passWordConfirm){
+          Map<String, String> params = new Map();
+          params['username'] = userName;
+          params['password'] = password;
+          params['repassword'] = passWordConfirm;
+          Http.post(Api.USER_REGISTER, params: params, saveCookie: true)
+              .then((result) {
+            SpUtils.map2UserInfo(result).then((userInfoBean) {
+              if (userInfoBean != null) {
+                OsApplication.eventBus.fire(new LoginEvent(userInfoBean.username));
+                SpUtils.saveUserInfo(userInfoBean);
+                Navigator.pop(context);
+              }
+            });
+          });
+        }else{
+          TsUtils.showShort('两次密码不一致哟~');
+        }
     } else {
       TsUtils.showShort('请输入用户名和密码');
     }

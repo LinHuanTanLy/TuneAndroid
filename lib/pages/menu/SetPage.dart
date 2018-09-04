@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/app/OsApplication.dart';
 import 'package:flutterdemo/domain/event/LoginEvent.dart';
+import 'package:flutterdemo/pages/news/NewsDetailPage.dart';
 import 'package:flutterdemo/utils/WidgetsUtils.dart';
 import 'package:flutterdemo/utils/cache/SpUtils.dart';
 
@@ -42,11 +43,14 @@ class _SetPageState extends State<SetPage> {
       onTap: () {
         switch (index) {
           case 0:
-            _showDialog();
             break;
           case 1:
+            Navigator.push(context, new MaterialPageRoute(builder: (context){
+              return NewsDetailPage('https://github.com/LinHuanTanLy','凌宇Ly');
+            }));
             break;
           case 2:
+            _showDialog();
             break;
         }
       },
@@ -73,11 +77,14 @@ class _SetPageState extends State<SetPage> {
     );
   }
 
+
+
+
   _showDialog() {
     showDialog(
         builder: (context) => new AlertDialog(
               title: new Text('提示'),
-              content: new Text('是否要清除掉缓存'),
+              content: new Text('是否要退出登录'),
               actions: <Widget>[
                 new FlatButton(
                     onPressed: () {

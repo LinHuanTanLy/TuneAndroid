@@ -21,7 +21,7 @@ class LeftDraw extends StatelessWidget {
   List menuIcons = [
     'images/leftmenu/ic_fabu.png',
     'images/leftmenu/ic_xiaoheiwu.png',
-    'images/leftmenu/ic_about.png',
+    'images/ic_about.png',
     'images/ic_set.png'
   ];
 

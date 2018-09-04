@@ -78,9 +78,11 @@ class Http {
         return data;
       } else {
         TsUtils.showShort(jsonStr['errorMsg']);
+        return null;
       }
     } else {
       TsUtils.showShort('您的网络好像不太好哟~~~///(^v^)\\\~~~');
+      return null;
     }
   }
 }
